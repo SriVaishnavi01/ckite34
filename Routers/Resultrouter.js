@@ -4,9 +4,12 @@ const resultController = require("../Controllers/ResultControllers");
 
 // Create a new result
 router.post("/results", resultController.createResult);
+// Create a new result with a email
+router.post("/results/:email", resultController.createResult);
 
 // Get all results
 router.get("/results", resultController.getAllResults);
+
 
 // Get a result by registered email
 router.get("/results/:email", resultController.getResultByEmail);

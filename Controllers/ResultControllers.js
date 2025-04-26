@@ -10,6 +10,17 @@ exports.createResult = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+//cretae a new result with a email
+exports.createResultWithEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const result = new Result({ ...req.body, email });
+    await result.save();
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 // Get all results
 exports.getAllResults = async (req, res) => {
