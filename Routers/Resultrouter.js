@@ -8,7 +8,7 @@ router.post("/results", resultController.createResult);
 router.post("/results/:email", resultController.createResult);
 
 // Get all results
-router.get("/results", resultController.getAllResults);
+router.get("/result", resultController.getAllResults);
 
 
 // Get a result by registered email

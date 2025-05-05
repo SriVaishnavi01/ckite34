@@ -1,13 +1,39 @@
-const Result = require("../Model/ResultSchema");
+const Result = require('../Model/ResultSchema'); // Import the Result model
 
-// Create a new result
+ // Adjust path as needed
+
 exports.createResult = async (req, res) => {
   try {
-    const result = new Result(req.body);
-    await result.save();
-    res.status(201).json(result);
+    const { email, subModuleName, score, maxScore, percentage, questionsAttempted, totalQuestions, timeTaken, totalTime, startTime, endTime, answers } = req.body;
+
+    const newResult = new Result({
+      email,
+      subModuleName,
+      score,
+      maxScore,
+      percentage,
+      questionsAttempted,
+      totalQuestions,
+      timeTaken,
+      totalTime,
+      startTime,
+      endTime,
+      answers  // Answers will be passed here as an array
+    });
+
+    // Save the result to the database
+    await newResult.save();
+
+    return res.status(201).json({
+      message: "Result created successfully",
+      data: newResult
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Error creating result:", error);
+    return res.status(400).json({
+      message: "Error creating result",
+      error: error.message
+    });
   }
 };
 //cretae a new result with a email
@@ -22,54 +48,86 @@ exports.createResultWithEmail = async (req, res) => {
   }
 };
 
+
 // Get all results
 exports.getAllResults = async (req, res) => {
   try {
-    const results = await Result.find();
-    res.status(200).json(results);
+    const results = await Result.find(); // Find all results in the database
+    return res.status(200).json({
+      message: 'Results retrieved successfully',
+      data: results
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(400).json({
+      message: 'Error retrieving results',
+      error: error.message
+    });
   }
 };
 
-// Get a single result by registered email
+// Get a result by email
 exports.getResultByEmail = async (req, res) => {
   try {
-    const result = await Result.findOne({ email: req.params.email });
+    const result = await Result.findOne({ email: req.params.email }); // Find result by email
     if (!result) {
-      return res.status(404).json({ message: "Result not found" });
+      return res.status(404).json({
+        message: 'Result not found'
+      });
     }
-    res.status(200).json(result);
+    return res.status(200).json({
+      message: 'Result retrieved successfully',
+      data: result
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(400).json({
+      message: 'Error retrieving result',
+      error: error.message
+    });
   }
 };
 
-// Update a result by registered email
+// Update result by email
 exports.updateResultByEmail = async (req, res) => {
   try {
-    const result = await Result.findOneAndUpdate({ email: req.params.email }, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!result) {
-      return res.status(404).json({ message: "Result not found" });
+    const updatedResult = await Result.findOneAndUpdate(
+      { email: req.params.email }, // Find result by email
+      req.body, // Updated data
+      { new: true } // Return the updated result
+    );
+    if (!updatedResult) {
+      return res.status(404).json({
+        message: 'Result not found'
+      });
     }
-    res.status(200).json(result);
+    return res.status(200).json({
+      message: 'Result updated successfully',
+      data: updatedResult
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({
+      message: 'Error updating result',
+      error: error.message
+    });
   }
 };
 
-// Delete a result by registered email
+// Delete result by email
 exports.deleteResultByEmail = async (req, res) => {
   try {
-    const result = await Result.findOneAndDelete({ email: req.params.email });
-    if (!result) {
-      return res.status(404).json({ message: "Result not found" });
+    const deletedResult = await Result.findOneAndDelete({ email: req.params.email }); // Find and delete result by email
+    if (!deletedResult) {
+      return res.status(404).json({
+        message: 'Result not found'
+      });
     }
-    res.status(200).json({ message: "Result deleted successfully" });
+    return res.status(200).json({
+      message: 'Result deleted successfully',
+      data: deletedResult
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(400).json({
+      message: 'Error deleting result',
+      error: error.message
+    });
   }
 };

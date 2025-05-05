@@ -8,6 +8,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const router = require("./Routers/genericIndex");
 const resultRoutes = require("./Routers/Resultrouter");
 const userRoutes = require("./Routers/userRoutes");
+const RegisterRoutes = require("./Routers/registerRoutes");
 dotenv.config(); // Load environment variables
 
 const app = express();
@@ -35,6 +36,7 @@ mongoose.connect(MONGODB_URI, {
 app.use("/api/v1", router);
 app.use("/api", resultRoutes);
 app.use("/api/v1", userRoutes);
+app.use("/api/v1", RegisterRoutes);
 
 
 
