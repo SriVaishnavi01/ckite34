@@ -35,7 +35,6 @@ mongoose.connect(MONGODB_URI, {
 // Routes
 app.use("/api/v1", router);
 app.use("/api", resultRoutes);
-app.use("/api/v1", userRoutes);
 app.use("/api/v1", RegisterRoutes);
 
 

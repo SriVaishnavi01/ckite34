@@ -1,71 +1,78 @@
-const Registration = require('../models/Registration');
+const { Registration, User } = require('../models/Registration'); // Adjust path as needed
 
-// Create new user
-exports.createUser = async (req, res) => {
+// Register a new user
+exports.registerUser = async (req, res) => {
   try {
-    const user = new Registration(req.body);
+    const registration = new Registration(req.body);
+    await registration.save();
+
+    const user = new User({
+      firstName: registration.firstName,
+      lastName: registration.lastName,
+      email: registration.email,
+      instituteName: registration.instituteName,
+      stream: registration.stream,
+      phonenumber: registration.phoneNumber,
+    });
+
     await user.save();
-    res.status(201).json({ message: 'User registered successfully', user });
+
+    res.status(201).json({ message: 'Registration successful', user, registration });
   } catch (err) {
-    res.status(400).json({ message: 'Error creating user', error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
 
-// Get all users
-exports.getAllUsers = async (req, res) => {
+// Get all registrations
+exports.getAllRegistrations = async (req, res) => {
   try {
-    const users = await Registration.find({}, '-password -results'); // Exclude password/results if not needed
-    res.status(200).json(users);
+    const registrations = await Registration.find();
+    res.json(registrations);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching users', error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Get single user by ID
-exports.getUserById = async (req, res) => {
-  try {
-    const user = await Registration.findById(req.params.id, '-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching user', error: err.message });
-  }
-};
-// Get user by email
+// Get registration by email
 exports.getUserByEmail = async (req, res) => {
   try {
-    const email = req.params.email.toLowerCase(); // normalize email
-    const user = await Registration.findOne({ email }, '-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json(user);
+    const email = req.params.email;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching user by email', error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
 
-
-// Update user by ID
-exports.updateUser = async (req, res) => {
+// Update user by email
+exports.updateUserByEmail = async (req, res) => {
   try {
-    const user = await Registration.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json({ message: 'User updated successfully', user });
+    const email = req.params.email;
+    const updatedUser = await User.findOneAndUpdate({ email }, req.body, { new: true });
+
+    if (!updatedUser) return res.status(404).json({ error: 'User not found' });
+
+    res.json(updatedUser);
   } catch (err) {
-    res.status(400).json({ message: 'Error updating user', error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
 
-// Delete user by ID
-exports.deleteUser = async (req, res) => {
+// Delete user by email
+exports.deleteUserByEmail = async (req, res) => {
   try {
-    const user = await Registration.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json({ message: 'User deleted successfully' });
+    const email = req.params.email;
+
+    const deletedUser = await User.findOneAndDelete({ email });
+    const deletedRegistration = await Registration.findOneAndDelete({ email });
+
+    if (!deletedUser) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ message: 'User and registration deleted' });
   } catch (err) {
-    res.status(500).json({ message: 'Error deleting user', error: err.message });
+    res.status(400).json({ error: err.message });
   }
 };
