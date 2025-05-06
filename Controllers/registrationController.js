@@ -13,6 +13,8 @@ exports.registerUser = async (req, res) => {
       instituteName: registration.instituteName,
       stream: registration.stream,
       phonenumber: registration.phoneNumber,
+      degree: registration.degree,
+      password: registration.password,
     });
 
     await user.save();

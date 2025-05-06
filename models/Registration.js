@@ -10,6 +10,8 @@ const userSchema = new Schema({
   instituteName: String,
   stream: String,
   phonenumber: String,
+  degree: String,
+  password: { type: String, required: true },
 }, { timestamps: true });
 
 // Registration Schema
