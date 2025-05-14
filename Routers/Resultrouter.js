@@ -2,22 +2,38 @@ const express = require("express");
 const router = express.Router();
 const resultController = require("../Controllers/ResultControllers");
 
-// Create a new result
-router.post("/results", resultController.createResult);
-// Create a new result with a email
-router.post("/results/:email", resultController.createResult);
 
-// Get all results
-router.get("/result", resultController.getAllResults);
+// CREATE
+router.post('/results', resultController.createResult);
 
+// CREATE with email
+router.post('/results/email/:email', resultController.createResultWithEmail);
+// CREATE with submodule name
+router.post('/results/submodule/:subModuleName', resultController.createResultWithSubmodule);
 
-// Get a result by registered email
-router.get("/results/:email", resultController.getResultByEmail);
+// CREATE with email and submodule
+router.post('/results/email/:email/submodule/:subModuleName', resultController.createResultWithSubmodule);
 
-// Update a result by registered email
-router.put("/results/:email", resultController.updateResultByEmail);
+// READ ALL
+router.get('/results', resultController.getAllResults);
 
-// Delete a result by registered email
-router.delete("/results/:email", resultController.deleteResultByEmail);
+// READ BY ID
+router.get('/results/:id', resultController.getResultById);
+
+// READ BY EMAIL
+router.get('/results/email/:email', resultController.getResultsByEmail);
+
+// READ BY SUBMODULE
+router.get('/results/submodule/:subModuleName', resultController.getResultsBySubmodule);
+
+// READ BY EMAIL & SUBMODULE
+router.get('/results/email/:email/submodule/:subModuleName', resultController.getResultsByEmailAndSubmodule);
+
+// UPDATE
+router.put('/results/:id', resultController.updateResult);
+
+// DELETE
+router.delete('/results/:id', resultController.deleteResult);
 
 module.exports = router;
+

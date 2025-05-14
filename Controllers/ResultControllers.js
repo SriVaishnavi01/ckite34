@@ -1,133 +1,113 @@
-const Result = require('../Model/ResultSchema'); // Import the Result model
+const Result = require('../Model/ResultSchema');
 
- // Adjust path as needed
 
+// CREATE
 exports.createResult = async (req, res) => {
   try {
-    const { email, subModuleName, score, maxScore, percentage, questionsAttempted, totalQuestions, timeTaken, totalTime, startTime, endTime, answers } = req.body;
-
-    const newResult = new Result({
-      email,
-      subModuleName,
-      score,
-      maxScore,
-      percentage,
-      questionsAttempted,
-      totalQuestions,
-      timeTaken,
-      totalTime,
-      startTime,
-      endTime,
-      answers  // Answers will be passed here as an array
-    });
-
-    // Save the result to the database
-    await newResult.save();
-
-    return res.status(201).json({
-      message: "Result created successfully",
-      data: newResult
-    });
+    const result = new Result(req.body);
+    const saved = await result.save();
+    res.status(201).json({ message: "Result saved successfully", data: saved });
   } catch (error) {
-    console.error("Error creating result:", error);
-    return res.status(400).json({
-      message: "Error creating result",
-      error: error.message
-    });
+    res.status(500).json({ message: "Failed to save result", error });
   }
 };
-//cretae a new result with a email
+// CREATE with submodule name
+exports.createResultWithSubmodule = async (req, res) => {
+  try {
+    const { email, subModuleName } = req.params;
+    const result = new Result({ ...req.body, email, subModuleName });
+    const saved = await result.save();
+    res.status(201).json({ message: "Result saved successfully", data: saved });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to save result", error });
+  }
+};
+// CREATE with email
 exports.createResultWithEmail = async (req, res) => {
   try {
     const { email } = req.params;
     const result = new Result({ ...req.body, email });
-    await result.save();
-    res.status(201).json(result);
+    const saved = await result.save();
+    res.status(201).json({ message: "Result saved successfully", data: saved });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ message: "Failed to save result", error });
   }
 };
 
-
-// Get all results
+// READ ALL
 exports.getAllResults = async (req, res) => {
   try {
-    const results = await Result.find(); // Find all results in the database
-    return res.status(200).json({
-      message: 'Results retrieved successfully',
-      data: results
-    });
+    const results = await Result.find();
+    res.status(200).json(results);
   } catch (error) {
-    return res.status(400).json({
-      message: 'Error retrieving results',
-      error: error.message
-    });
+    res.status(500).json({ message: "Failed to fetch results", error });
   }
 };
 
-// Get a result by email
-exports.getResultByEmail = async (req, res) => {
+// READ BY ID
+exports.getResultById = async (req, res) => {
   try {
-    const result = await Result.findOne({ email: req.params.email }); // Find result by email
-    if (!result) {
-      return res.status(404).json({
-        message: 'Result not found'
-      });
-    }
-    return res.status(200).json({
-      message: 'Result retrieved successfully',
-      data: result
-    });
+    const result = await Result.findById(req.params.id);
+    if (!result) return res.status(404).json({ message: "Result not found" });
+    res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      message: 'Error retrieving result',
-      error: error.message
-    });
+    res.status(500).json({ message: "Failed to fetch result", error });
   }
 };
 
-// Update result by email
-exports.updateResultByEmail = async (req, res) => {
+// READ BY SUBMODULE
+exports.getResultsBySubmodule = async (req, res) => {
   try {
-    const updatedResult = await Result.findOneAndUpdate(
-      { email: req.params.email }, // Find result by email
-      req.body, // Updated data
-      { new: true } // Return the updated result
-    );
-    if (!updatedResult) {
-      return res.status(404).json({
-        message: 'Result not found'
-      });
-    }
-    return res.status(200).json({
-      message: 'Result updated successfully',
-      data: updatedResult
-    });
+    const results = await Result.find({ subModuleName: req.params.subModuleName });
+    if (!results.length) return res.status(404).json({ message: "No results for this submodule" });
+    res.status(200).json(results);
   } catch (error) {
-    return res.status(400).json({
-      message: 'Error updating result',
-      error: error.message
-    });
+    res.status(500).json({ message: "Failed to fetch submodule results", error });
   }
 };
 
-// Delete result by email
-exports.deleteResultByEmail = async (req, res) => {
+// UPDATE
+exports.updateResult = async (req, res) => {
   try {
-    const deletedResult = await Result.findOneAndDelete({ email: req.params.email }); // Find and delete result by email
-    if (!deletedResult) {
-      return res.status(404).json({
-        message: 'Result not found'
-      });
-    }
-    return res.status(200).json({
-      message: 'Result deleted successfully',
-      data: deletedResult
-    });
+    const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Result not found to update" });
+    res.status(200).json({ message: "Result updated", data: updated });
   } catch (error) {
-    return res.status(400).json({
-      message: 'Error deleting result',
-      error: error.message
-    });
+    res.status(500).json({ message: "Failed to update result", error });
+  }
+};
+// GET by Email
+exports.getResultsByEmail = async (req, res) => {
+  try {
+    const results = await Result.find({ email: req.params.email });
+    if (!results.length) return res.status(404).json({ message: "No results found for this email" });
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch email results", error });
+  }
+};
+
+
+
+// GET by Email and Submodule
+exports.getResultsByEmailAndSubmodule = async (req, res) => {
+  const { email, subModuleName } = req.params;
+  try {
+    const results = await Result.find({ email, subModuleName });
+    if (!results.length) return res.status(404).json({ message: "No results found for this email and submodule" });
+    res.status(200).json(results);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch results", error });
+  }
+};
+
+// DELETE
+exports.deleteResult = async (req, res) => {
+  try {
+    const deleted = await Result.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Result not found to delete" });
+    res.status(200).json({ message: "Result deleted", data: deleted });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete result", error });
   }
 };
